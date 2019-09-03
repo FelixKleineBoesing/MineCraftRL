@@ -1,9 +1,8 @@
 import minerl
-
+import os
 # YOU ONLY NEED TO DO THIS ONCE!
-minerl.data.download("data/")
-
-data = minerl.data.make('MineRLObtainDiamond-v0', data_dir='data/')
+#minerl.data.download("data/")
+data = minerl.data.make('MineRLObtainDiamond-v0', data_dir='D:\CodingProjects\MinrCraftRL\data')
 
 # Iterate through a single epoch gathering sequences of at most 32 steps
 for current_state, action, reward, next_state, done \
