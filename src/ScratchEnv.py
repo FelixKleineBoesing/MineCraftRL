@@ -1,16 +1,20 @@
 import minerl
 import gym
 
+from src.agents.QLearningAgent import QLearningAgent
+
 
 def main():
     env = gym.make('MineRLNavigateDense-v0')
-
-    obs = env.reset()
+    agent = QLearningAgent()
+    state = env.reset()
 
     done = False
     while not done:
         action = env.action_space.sample()
-        obs, reward, done, info = env.step(action)
+        next_state, reward, done, info = env.step(action)
+        agent.
+        state = next_state
 
 
 if __name__ == '__main__':
