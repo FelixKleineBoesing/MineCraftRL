@@ -2,17 +2,13 @@ import abc
 import numpy as np
 import logging
 
-from checkers.game.GameHelpers import ActionSpace
-from checkers.Helpers import Config
-from checkers.cache.RedisWrapper import RedisCache, RedisChannel
-from checkers.cache.RedisWrapper import get_key
+from src.Helpers import Config
 
 
 class Agent(abc.ABC):
 
     def __init__(self, state_shape: tuple, action_shape: tuple, name: str, side: str = "up",
-                 config: Config = None, caching: bool = False,
-                 cache: RedisCache = None, channel: RedisChannel = None):
+                 config: Config = None, caching: bool = False):
         """
         abstract class for agent which define the general interface for Agents
         :param name:

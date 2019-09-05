@@ -13,7 +13,7 @@ def main():
     while not done:
         action = env.action_space.sample()
         next_state, reward, done, info = env.step(action)
-        agent.
+        agent._get_feedback_inner(state, action, reward, next_state, done)
         state = next_state
 
 

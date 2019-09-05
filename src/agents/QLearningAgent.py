@@ -5,11 +5,9 @@ import random
 import os
 import logging
 
-from checkers.src.agents.Agent import Agent
-from checkers.src.ReplayBuffer import ReplayBuffer
-from checkers.src.cache.RedisWrapper import RedisChannel, RedisCache
-from checkers.src.Helpers import Config, multiply, min_max_scaling
-from checkers.src.game.GameHelpers import ActionSpace
+from src.agents.Agent import Agent
+from src.agents.ReplayBuffer import ReplayBuffer
+from src.Helpers import Config, multiply, min_max_scaling
 
 
 class QLearningAgent(Agent):
@@ -17,7 +15,7 @@ class QLearningAgent(Agent):
     def __init__(self, state_shape: tuple, action_shape: tuple, name: str, side: str = "up", epsilon: float = 0.0,
                  intervall_turns_train: int = np.Inf, intervall_turns_load: int = np.Inf,
                  save_path: str = "../data/modeldata/q/model.ckpt", caching: bool = False,
-                 config: Config = None, cache: RedisCache = None, channel: RedisChannel = None):
+                 config: Config = None):
         """
         Agent which implements Q Learning
         :param state_shape: shape of state
