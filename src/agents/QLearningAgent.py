@@ -7,15 +7,13 @@ import logging
 
 from src.agents.Agent import Agent
 from src.agents.ReplayBuffer import ReplayBuffer
-from src.Helpers import Config, multiply, min_max_scaling
+from src.Helpers import multiply, min_max_scaling
 
 
 class QLearningAgent(Agent):
 
-    def __init__(self, state_shape: tuple, action_shape: tuple, name: str, side: str = "up", epsilon: float = 0.0,
-                 intervall_turns_train: int = np.Inf, intervall_turns_load: int = np.Inf,
-                 save_path: str = "../data/modeldata/q/model.ckpt", caching: bool = False,
-                 config: Config = None):
+    def __init__(self, epsilon: float = 0.0, intervall_turns_train: int = np.Inf, intervall_turns_load: int = np.Inf,
+                 save_path: str = "../data/modeldata/q/model.ckpt"):
         """
         Agent which implements Q Learning
         :param state_shape: shape of state
@@ -26,13 +24,11 @@ class QLearningAgent(Agent):
         """
 
         # tensorflow related stuff
-        self.name = name
         self._batch_size = 512
         self._learning_rate = 0.01
         self._gamma = 0.99
 
         # calculate number actions from actionshape
-        self.number_actions = np.product(action_shape)
         self._intervall_actions_train = intervall_turns_train
         self._intervall_turns_load = intervall_turns_load
 
@@ -49,7 +45,7 @@ class QLearningAgent(Agent):
         # copy weight to target weights
         self.load_weigths_into_target_network()
 
-        super().__init__(state_shape, action_shape, name, side, config, caching, cache, channel)
+        super().__init__()
 
     def decision(self, state_space: np.ndarray, action_space: ActionSpace):
         """

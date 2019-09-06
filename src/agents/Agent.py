@@ -1,50 +1,23 @@
 import abc
 import numpy as np
-import logging
-
-from src.Helpers import Config
 
 
 class Agent(abc.ABC):
 
-    def __init__(self, state_shape: tuple, action_shape: tuple, name: str, side: str = "up",
-                 config: Config = None, caching: bool = False):
+    def __init__(self):
         """
         abstract class for agent which define the general interface for Agents
         :param name:
         :param side:
         """
-        assert side in ["up", "down"], "Side has to be up or down"
-        self.name = name
-        self.side = side
-        self.state_shape = state_shape
-        self.action_shape = action_shape
+        self.state_shape = None
+        self.action_shape = None
         self.number_turns = 0
         self.td_loss_history = []
         self.moving_average_loss = []
         self.reward_history = []
         self.moving_average_rewards = []
         self._episode_reward = 0
-        if config is None:
-            config = Config()
-
-        if caching:
-            logging.debug("Caching is considered! When you don´t deliver cache and stream by yourself, the agent will "
-                          "get a redis stream and cache by default")
-            if cache is None:
-                self.redis_cache = RedisCache(host=config["REDIS_HOST"], port=config["REDIS_PORT"],
-                                              db=int(config["REDIS_DB"]))
-            else:
-                self.redis_cache = cache
-            if channel is None:
-                self.redis_channel = RedisChannel(host=config["REDIS_HOST"], port=config["REDIS_PORT"],
-                                                  db=int(config["REDIS_DB"]))
-            else:
-                self.redis_channel = channel
-        else:
-            self.redis_cache = None
-            self.redis_channel = None
-            logging.info("No caching is considered!")
 
     def play_turn(self, state_space: np.ndarray, action_space: ActionSpace):
         """
