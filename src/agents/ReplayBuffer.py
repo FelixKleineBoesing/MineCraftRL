@@ -4,6 +4,10 @@ import random
 
 class ReplayBuffer:
 
+    """
+    Use Experience Replay to get rid of the correlation between states in a trajectory, therefore sample random
+    """
+
     def __init__(self, size: int = 10000):
         """Create Replay buffer.
         Parameters

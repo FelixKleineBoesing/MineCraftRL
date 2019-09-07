@@ -7,8 +7,7 @@ import logging
 
 from src.agents.Agent import Agent
 from src.agents.ReplayBuffer import ReplayBuffer
-from src.Helpers import multiply, min_max_scaling
-
+from src.Helpers import multiply, min_max_scaling, ActionSpace
 
 class QLearningAgent(Agent):
 
@@ -32,8 +31,8 @@ class QLearningAgent(Agent):
         self._intervall_actions_train = intervall_turns_train
         self._intervall_turns_load = intervall_turns_load
 
-        self.network = self._configure_network(state_shape)
-        self.target_network = self._configure_network(state_shape)
+        self.network = self._configure_network()
+        self.target_network = self._configure_network()
 
         self.epsilon = epsilon
         self.exp_buffer = ReplayBuffer(100000)
@@ -126,17 +125,12 @@ class QLearningAgent(Agent):
         ma = self.moving_average_loss[-1]
         relative_ma = self.moving_average_loss[-1] / self._batch_size
         logging.info("Loss: {},     relative Loss: {}".format(ma, relative_ma))
-        if self.redis_cache is not None:
-            self.publish_data()
 
-    def _configure_network(self, state_shape: tuple):
+    def _configure_network(self):
         network = tf.keras.models.Sequential([
-            Dense(512, activation="relu", input_shape=(multiply(*state_shape), )),
-            # Dense(1024, activation="relu"),
-            # Dense(2048, activation="relu"),
-            # Dense(4096, activation="relu"),
+            Dense(512, activation="relu", input_shape=(1000, )), #TODO Dummy
             Dense(2048, activation="relu"),
-            Dense(self.number_actions, activation="linear")])
+            Dense(2048, activation="linear")])
 
         self.optimizer = tf.optimizers.Adam(self._learning_rate)
         return network
@@ -147,7 +141,7 @@ class QLearningAgent(Agent):
         @tf.function
         def td_loss():
             current_qvalues = self._get_qvalues(obs)
-            current_action_qvalues = tf.reduce_sum(tf.one_hot(actions, self.number_actions) * current_qvalues, axis=1)
+            current_action_qvalues = tf.reduce_sum(tf.one_hot(actions, 2048) * current_qvalues, axis=1)
 
             next_qvalues_target = self.target_network(next_obs)
             next_state_values_target = tf.reduce_min(next_qvalues_target, axis=-1)

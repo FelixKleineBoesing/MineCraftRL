@@ -53,6 +53,25 @@ def min_max_scaling(arr: np.ndarray, min_val: float=-2.0, max_val: float=2.0):
 
 
 def update_managed_dict(managed_dict, game_id, key, value):
+    """
+    updates a managed dictionary since complex data structures must be called from managed dict, then be updated and
+    finally put back into the dictionary
+
+    :param managed_dict: multiprocessing dictionary
+    :param game_id:
+    :param key:
+    :param value:
+    :return:
+    """
     content = managed_dict[game_id]
     content[key] = value
     managed_dict[game_id] = content
+
+
+class ActionSpace:
+    """
+    this class represents the ActionSpace of MInecraft ObtainDiamond env
+    """
+
+    def __init__(self):
+        pass

@@ -1,6 +1,8 @@
 import abc
 import numpy as np
 
+from src.Helpers import ActionSpace
+
 
 class Agent(abc.ABC):
 
@@ -74,18 +76,3 @@ class Agent(abc.ABC):
         :return: np.array(X_From, Y_From, X_To, Y_To)
         """
         pass
-
-    def publish_data(self):
-        data = {"rewards": self.reward_history,
-                "avg_rewards": self.moving_average_rewards,
-                "loss": self.td_loss_history,
-                "avg_loss": self.moving_average_loss}
-        key = get_key(self.name)
-        self._put_in_cache(key, data)
-        self._put_in_channel(self.name, key)
-
-    def _put_in_cache(self, key: str, data: dict):
-        self.redis_cache.put_data_into_cache(key, data)
-
-    def _put_in_channel(self, channel_name: str, key: str):
-        self.redis_channel.put_into_channel(channel_name, {"target": "stats", "data_key": key})
