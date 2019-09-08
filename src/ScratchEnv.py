@@ -8,13 +8,13 @@ def main():
     env = gym.make('MineRLNavigateDense-v0')
     action_space = ActionSpace(action_space=env.action_space)
 
-    agent = ActorCritic(action_space = action_space)
+    agent = ActorCritic(action_space=action_space)
     state = env.reset()
 
     done = False
     while not done:
-        agent.play_turn(state)
-        action = env.action_space.sample()
+        action = agent.play_turn(state["pov"])
+        #action = env.action_space.sample()
         next_state, reward, done, info = env.step(action)
         #agent._get_feedback_inner(state, action, reward, next_state, done)
         state = next_state

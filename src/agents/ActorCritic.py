@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.keras.layers import Dense, Flatten, LSTM, Input
+from tensorflow.python.keras.layers import Dense, Flatten, LSTM, Input, Conv2D
 import random
 import os
 import logging
@@ -66,13 +66,12 @@ class ActorCritic(Agent):
         # preprocess state space
         # normalizing state space between zero and one ( 2 is max value of stone and -2 is min value of stone
         state_space = min_max_scaling(state_space)
-        state_space = state_space.reshape(1, multiply(*state_space.shape))
 
-        qvalues, state_values = self._get_qvalues([state_space])
-        decision = self._sample_actions(qvalues, self.action_space)
+        qvalues, state_values = self.network([state_space])
+        decision = self._sample_actions(qvalues)
         return decision
 
-    def _sample_actions(self, qvalues: np.ndarray, action_space):
+    def _sample_actions(self, qvalues: np.ndarray):
         """
         pick actions given qvalues. Uses epsilon-greedy exploration strategy.
         :param qvalues: output values from network
@@ -81,10 +80,8 @@ class ActorCritic(Agent):
         """
         epsilon = self.epsilon
         batch_size, x = qvalues.shape
-        dim = int(x ** 0.25)
-        qvalues_reshaped = np.reshape(qvalues, (dim, dim, dim, dim))
         if random.random() < epsilon:
-            decision = action_space.action_space.sample()
+            decision = self.action_space.action_space.sample()
         else:
             possible_actions = qvalues_reshaped * action_space.space_array
             flattened_index = np.nanargmax(possible_actions)
@@ -99,11 +96,6 @@ class ActorCritic(Agent):
             self.train_network()
         if self.number_turns % self._intervall_turns_load == 0 and self.number_turns > 1:
             self._load_weights_into_target_network()
-
-    def _get_qvalues(self, state_t):
-        """takes agent's observation, returns qvalues. Both are tf Tensors"""
-        qvalues = self.network(state_t)
-        return qvalues
 
     def _load_weights_into_target_network(self):
         """ assign target_network.weights variables to their respective agent.weights values. """
@@ -134,15 +126,15 @@ class ActorCritic(Agent):
 
     def _configure_network(self):
         # define network
-        inputs = Input(shape=(1, 10))
-        x = Dense(512, activation="relu", input_shape=(1, 64), return_sequences=True)(inputs)
-        #x = LSTM(1024, activation="relu", return_sequences=True)(x)
-        #x = LSTM(2048, activation="relu", return_sequences=True)(x)
-        #x = Dense(4096, activation="relu")(x)
-        x = Dense(2048, activation="relu")(x)
+        inputs = Input(shape=(64, 64, 3))
+        x = Conv2D(32, (3,3), strides=2, activation="relu")(inputs)
+        x = Conv2D(32, (3, 3), strides=2, activation="relu")(x)
+        x = Conv2D(32, (3, 3), strides=2, activation="relu")(x)
         x = Flatten()(x)
+        x = Dense(512, activation="relu")(x)
+        x = Dense(2048, activation="relu")(x)
 
-        logits = Dense(1, activation="linear")(x)
+        logits = Dense(512, activation="linear")(x)
         state_value = Dense(1, activation="linear")(x)
         network = tf.keras.models.Model(inputs=inputs, outputs=[logits, state_value])
         self.optimizer = tf.optimizers.Adam(self._learning_rate)
@@ -153,7 +145,7 @@ class ActorCritic(Agent):
         # Decorator autographs the function
         @tf.function
         def td_loss():
-            qvalues, state_values = self._get_qvalues(obs)
+            qvalues, state_values = self.network(obs)
             next_qvalues, next_state_values = self.target_network(next_obs)
             next_state_values = next_state_values * (1 - is_done)
             probs = tf.nn.softmax(qvalues)
