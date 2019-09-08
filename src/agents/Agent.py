@@ -21,20 +21,18 @@ class Agent(abc.ABC):
         self.moving_average_rewards = []
         self._episode_reward = 0
 
-    def play_turn(self, state_space: np.ndarray, action_space: ActionSpace):
+    def play_turn(self, state_space: np.ndarray):
         """
         get all possible actions and decide which action to take
         :param state_space: np array describing the board
         :param action_space: dictionary containing all possible moves
         :return:
         """
-        decision = self.decision(state_space, action_space)
-        assert isinstance(decision, np.ndarray), "decision return must be a numpy array"
-        assert len(decision) == 4, "decision return must be a np array with length 4"
+        decision = self.decision(state_space)
         self.number_turns += 1
         return decision
 
-    def get_feedback(self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray, finished: bool):
+    def get_feedback(self, state: np.ndarray, action: dict, reward: float, next_state: np.ndarray, finished: bool):
         """
         through this function the agent gets information about the last turn
         :param state:
@@ -53,10 +51,11 @@ class Agent(abc.ABC):
             self._episode_reward += reward
         self._get_feedback_inner(state, action, reward, next_state, finished)
 
-    def _get_feedback_inner(self, state: np.ndarray, action: int, reward: float, next_state: np.ndarray,
+    def _get_feedback_inner(self, state: np.ndarray, action: dict, reward: float, next_state: np.ndarray,
                             finished: bool):
         """
         implement this function if you want to gather informations about your game
+
         :param state:
         :param action:
         :param reward:
@@ -67,12 +66,13 @@ class Agent(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def decision(self, state_space: np.ndarray, action_space: ActionSpace):
+    def decision(self, state: np.ndarray):
         """
         this function must implement a decision based in the action_space and other delivered arguments
         return must be a dictionary with the following keys: "stone_id" and "move_index" which indicates
         the stone and move that should be executed
-        :param action_space:
-        :return: np.array(X_From, Y_From, X_To, Y_To)
+
+        :param state: current state for which an action should be chosen
+        :return: action space from gym env (ObtainDiamondDense)
         """
         pass

@@ -2,6 +2,7 @@ import numpy as np
 import simplejson
 import os
 import logging
+from collections import OrderedDict
 
 
 class Config:
@@ -69,9 +70,33 @@ def update_managed_dict(managed_dict, game_id, key, value):
 
 
 class ActionSpace:
-    """
-    this class represents the ActionSpace of MInecraft ObtainDiamond env
-    """
 
-    def __init__(self):
-        pass
+    def __init__(self, action_space):
+        """
+
+        :param action_space: action space from gym env
+        """
+        self.action_space = action_space
+        self.number_discrete_actions = 9
+        self.length_action_vector = 2 ** 9
+
+    def build_action_vector(self, action_dict: dict):
+        actions = ["attack", "back", "forward", "jump", "left", "place", "right", "sneak", "sprint"]
+        value = ""
+        for action in actions:
+            value += str(action_dict[action])
+        index = int(value, 2)
+        action_vector = np.zeros((self.length_action_vector, 1))
+        action_vector[index] = 1
+
+        return action_vector
+
+    def build_action_dict(self, action_vector: np.array):
+        actions = ["attack", "back", "forward", "jump", "left", "place", "right", "sneak", "sprint"]
+        action_dict = OrderedDict()
+        index = np.where(action_vector == 1)[0][0]
+        binary_number = bin(index)[2:]
+        for action, valu in zip(actions, binary_number):
+            action_dict[action] = valu
+
+        return action_dict
